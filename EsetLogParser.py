@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from datetime import datetime
 import argparse
 import struct
 import os, time
 import sys
 
 VERSION = '0.1'
+TIMEFORMAT = '%Y-%m-%dT%H:%M:%SZ'
 NULL = '\x00\x00'
 RECORD_HEADER = '\x01\x00\x00\x00\x02\x00\x00\x00' #prefixed by little-endian representation of 32-bit ID of record
 OBJECT_HEADER = '\xbe\x0b\x4e\x00'
@@ -17,6 +19,7 @@ VIRUSDB_HEADER = '\x17\x27\x4e\x00'
 PROGNAME_HEADER = '\xc4\x0b\x4e\x00'
 PROGHASH_HEADER = '\x9d\x13\x42\x00'
 OBJECTHASH_HEADER = '\x9e\x13\x42\x00'
+FIRSTSEEN_HEADER = '\x9f\x13\x46\x00'
 
 dataTypeHeaders = {'Object': OBJECT_HEADER,
                    'Infiltration': INFILTRATION_HEADER,
@@ -66,6 +69,17 @@ def _extractHashType(hashType,rawRecord):
 	hashHex = rawRecord[hashOffset+8:hashEnd]
 	return hashHex.encode('hex')
 
+def _extractFirstSeen(rawRecord):
+	#Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
+
+	offset = rawRecord.find(FIRSTSEEN_HEADER);
+	if offset < 0:
+		_warningNotFound('FirstSeen')
+		return ''
+	littleEndianTimestamp = rawRecord[offset+4:offset+8]
+	timestamp = struct.unpack('<L', littleEndianTimestamp)[0]
+	return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
+
 def _findRecordOffset(recordId, rawData):
 	#Format: litle-endian 32 bit ID + RECORD_HEADER
 	littleEndianId = struct.pack('<L', recordId)
@@ -96,8 +110,9 @@ def parseRecord(recordId, rawRecord):
 	user = _extractDataType('User', rawRecord)
 	progname = _extractDataType('ProgName', rawRecord)
 	proghash = _extractHashType('ProgHash', rawRecord)
+	firstseen = _extractFirstSeen(rawRecord)
 
-	return [str(recordId), virusdb, obj, objhash, infiltration, user, progname, proghash]
+	return [str(recordId), virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
 
 def main():
 	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION)
@@ -112,7 +127,7 @@ def main():
 		virlog_data = f.read()
 
 	rawRecords = getRawRecords(virlog_data)
-	parsedRecords = [['ID', 'VirusDB', 'Object', 'ObjectHash','Infiltration', 'User', 'ProgName', 'ProgHash']]
+	parsedRecords = [['ID', 'VirusDB', 'Object', 'ObjectHash','Infiltration', 'User', 'ProgName', 'ProgHash', 'FirstSeen']]
 	for recordId, rawRecord in rawRecords:
 		parsedRecords.append(parseRecord(recordId, rawRecord))
 	print('\n'.join([';'.join(record) for record in parsedRecords]))

@@ -18,13 +18,13 @@ This Python script can parse some content from `virlog.dat` files and convert th
 - Program name (or process) in which the infiltration was detected
 - SHA1 hash of detected object
  Detected object
+- First seen timestemp
 
 ###Note
 It seems that not of the above fields are always present in record. If you don't see some of the above fields in the output of EsetLogParser, but you see this value in Eset GUI (Tools -> Logs), please send me the `virlog.dat` file and screenshot of Eset GUI Log Viewer.
 
 ##Known fields
-The list of curentlly reversed fields in `virlog.dat` file that are not parsed by EsetLogParser
-- First seen timestemp
+The list of curentlly reversed fields in `virlog.dat` file that are not parsed by EsetLogParser:
 
 ##Unknown fields
 The list of fields which I have not reversed in `virlog.dat` yet:
