@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import argparse
 import struct
 import os, time
+import sys
 
 VERSION = '0.1'
 NULL = '\x00\x00'
@@ -24,11 +26,15 @@ dataTypeHeaders = {'Object': OBJECT_HEADER,
 hashTypeHeaders = {'ObjectHash': OBJECTHASH_HEADER,
                'ProgHash': PROGHASH_HEADER}
 
+def eprint(*args, **kwargs):
+	'''Prints debug messages to stderr'''
+	print(*args, file=sys.stderr, **kwargs)
+
 def _warningNotFound(field):
-	print 'Warning: field not found: ' + field
+	eprint('Warning: field not found: ' + field)
 
 def _warningUnexpected(field):
-	print 'Warning: unexpected bytes in field ' + field
+	eprint('Warning: unexpected bytes in field ' + field)
 
 
 def _extractDataType(dataType,rawRecord):
@@ -109,7 +115,7 @@ def main():
 	parsedRecords = [['ID', 'VirusDB', 'Object', 'ObjectHash','Infiltration', 'User', 'ProgName', 'ProgHash']]
 	for recordId, rawRecord in rawRecords:
 		parsedRecords.append(parseRecord(recordId, rawRecord))
-	print '\n'.join([';'.join(record) for record in parsedRecords])
+	print('\n'.join([';'.join(record) for record in parsedRecords]))
 
 if __name__ == '__main__':
 	main()
