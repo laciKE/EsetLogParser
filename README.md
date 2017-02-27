@@ -24,13 +24,14 @@ Correct functionality of this script is not guaranteed, because the file format 
 - SHA1 hash of detected object
  Detected object
 - First seen timestamp
+- Timestamp of detection
+- ID of record
 
 ###Note
 It seems that not of the above fields are always present in record. If you don't see some of the above fields in the output of EsetLogParser, but you see this value in Eset GUI (Tools -> Logs), please send me the `virlog.dat` file and screenshot of Eset GUI Log Viewer.
 
 ##Known fields
 The list of curentlly reversed fields in `virlog.dat` file that are not parsed by EsetLogParser:
-- Timestamp of detection
 
 ##Unknown fields
 The list of fields which I have not reversed in `virlog.dat` yet:

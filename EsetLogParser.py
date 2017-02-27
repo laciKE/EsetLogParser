@@ -8,7 +8,7 @@ import struct
 import os, time
 import sys
 
-VERSION = '0.1'
+VERSION = '0.2'
 TIMEFORMAT = '%Y-%m-%dT%H:%M:%SZ'
 NULL = '\x00\x00'
 RECORD_HEADER = '\x24\x00\x00\x00\x01\x00\x01\x00'
@@ -39,6 +39,9 @@ def _warningNotFound(field):
 def _warningUnexpected(field):
 	eprint('Warning: unexpected bytes in field ' + field)
 
+def _winToUnixTimestamp(winTimestamp):
+	magicNumber = 11644473600
+	return (winTimestamp / 10000000) - magicNumber
 
 def _extractDataType(dataType,rawRecord):
 	#Format: dataType_HEADER + '??' + NULL + objectData + NULL
@@ -80,6 +83,14 @@ def _extractFirstSeen(rawRecord):
 	timestamp = struct.unpack('<L', littleEndianTimestamp)[0]
 	return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
 
+def _extractTimestamp(rawRecord):
+	#Format: RECORD_HEADER + ID[4] + MicrosoftTimestamp[8]
+
+	littleEndianTimestamp = rawRecord[4:12]
+	winTimestamp = struct.unpack('<Q', littleEndianTimestamp)[0]
+	timestamp = _winToUnixTimestamp(winTimestamp)
+	return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
+
 def _checkID(recordId, rawRecord):
 	littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
 	for littleEndianId in littleEndianIds:
@@ -94,6 +105,7 @@ def getRawRecords(rawData):
 	return records
 
 def parseRecord(recordId, rawRecord):
+	timestamp = _extractTimestamp(rawRecord)
 	virusdb = _extractDataType('VirusDB', rawRecord)
 	obj = _extractDataType('Object', rawRecord)
 	objhash = _extractHashType('ObjectHash', rawRecord)
@@ -103,10 +115,10 @@ def parseRecord(recordId, rawRecord):
 	proghash = _extractHashType('ProgHash', rawRecord)
 	firstseen = _extractFirstSeen(rawRecord)
 
-	return [str(recordId), virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
+	return [str(recordId), timestamp, virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
 
 def main():
-	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION)
+	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION, version=VERSION)
 	parser.add_argument('virlog', help='virlog.dat file to parse')
 
 	args = parser.parse_args()
@@ -118,7 +130,7 @@ def main():
 		virlog_data = f.read()
 
 	rawRecords = getRawRecords(virlog_data)
-	parsedRecords = [['ID', 'VirusDB', 'Object', 'ObjectHash','Infiltration', 'User', 'ProgName', 'ProgHash', 'FirstSeen']]
+	parsedRecords = [['ID', 'Timestamp', 'VirusDB', 'Object', 'ObjectHash','Infiltration', 'User', 'ProgName', 'ProgHash', 'FirstSeen']]
 	for recordId, rawRecord in rawRecords:
 		parsedRecords.append(parseRecord(recordId, rawRecord))
 	print('\n'.join([';'.join(record) for record in parsedRecords]))
