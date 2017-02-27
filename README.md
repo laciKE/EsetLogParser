@@ -11,6 +11,10 @@ On live system, it is not possible to overwrite the existing `virlog.dat`, becau
 
 This Python script can parse some content from `virlog.dat` files and convert this data to CSV format. This tool is based on reverse engineering the file format of `virlog.dat`, and work is in progress. For this reason, this scrit currently can not parse all the fields from `virlog.dat`.
 
+###Disclaimer
+Tested on current version of Eset Nod32 and Smart Security and also on versions from middle of 2016.
+Correct functionality of this script is not guaranteed, because the file format of `virlog.dat` is proprietary internal format of Eset and this format may change with new versions of Eset products. In this case please create an Issue and if it is possible, please also provide samples of `virlog.dat`.
+
 ##Supported fields
 - Detected object
 - Infiltration type
@@ -26,13 +30,13 @@ It seems that not of the above fields are always present in record. If you don't
 
 ##Known fields
 The list of curentlly reversed fields in `virlog.dat` file that are not parsed by EsetLogParser:
+- Timestamp of detection
 
 ##Unknown fields
 The list of fields which I have not reversed in `virlog.dat` yet:
 - Object type (file, etc.)
 - Scanner (resident shield)
 - Action (erase, quarantine)
-- Timestamp of detection
 
 ##Usage
 `python EsetLogParser.py path_to_virlog.dat`
