@@ -11,7 +11,7 @@ import sys
 VERSION = '0.1'
 TIMEFORMAT = '%Y-%m-%dT%H:%M:%SZ'
 NULL = '\x00\x00'
-RECORD_HEADER = '\x01\x00\x00\x00\x02\x00\x00\x00' #prefixed by little-endian representation of 32-bit ID of record
+RECORD_HEADER = '\x24\x00\x00\x00\x01\x00\x01\x00'
 OBJECT_HEADER = '\xbe\x0b\x4e\x00'
 INFILTRATION_HEADER = '\x4d\x1d\x4e\x00'
 USER_HEADER = '\xee\x03\x4e\x00'
@@ -80,27 +80,18 @@ def _extractFirstSeen(rawRecord):
 	timestamp = struct.unpack('<L', littleEndianTimestamp)[0]
 	return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
 
-def _findRecordOffset(recordId, rawData):
-	#Format: litle-endian 32 bit ID + RECORD_HEADER
-	littleEndianId = struct.pack('<L', recordId)
-	return rawData.find(littleEndianId + RECORD_HEADER)
+def _checkID(recordId, rawRecord):
+	littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
+	for littleEndianId in littleEndianIds:
+		if struct.unpack('<L', littleEndianId)[0] != recordId:
+			_warningUnexpected('ID')
 
 def getRawRecords(rawData):
-	#return virlog_data.split(RECORD_HEADER)[1:]
-	rawRecords = []
-	recordId = 0
-	recordOffset =_findRecordOffset(recordId, rawData)
-	nextRecordOffset = _findRecordOffset(recordId+1, rawData)
-	while nextRecordOffset > 0:
-		rawRecords.append((recordId, rawData[recordOffset:nextRecordOffset]))
-		rawData = rawData[nextRecordOffset:]
-		recordOffset = 0
-		recordId += 1
-		nextRecordOffset = _findRecordOffset(recordId+1, rawData)
-	rawRecords.append((recordId, rawData[recordOffset:]))
-
-	return rawRecords
-
+	rawRecords = rawData.split(RECORD_HEADER)[1:]
+	records = zip(range(len(rawRecords)), rawRecords)
+	for recordId, rawRecord in records:
+		_checkID(recordId, rawRecord)
+	return records
 
 def parseRecord(recordId, rawRecord):
 	virusdb = _extractDataType('VirusDB', rawRecord)
