@@ -1,4 +1,7 @@
 #EsetLogParser
+
+[![Build Status](https://travis-ci.org/laciKE/EsetLogParser.svg?branch=master)](https://travis-ci.org/laciKE/EsetLogParser) [![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)](https://www.python.org/)
+
 Proof of Concept
 
 ##About
