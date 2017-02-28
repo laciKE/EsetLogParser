@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+EsetLogParser: Python script for parsing ESET (NOD32) virlog.dat file.
+Copyright (C) 2017 Ladislav Baco
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 from __future__ import print_function
 from datetime import datetime
 import argparse
@@ -8,7 +26,14 @@ import struct
 import os, time
 import sys
 
-VERSION = '0.2'
+__author__ = 'Ladislav Baco'
+__copyright__ = 'Copyright (C) 2017'
+__credits__ = 'Ladislav Baco'
+__license__ = 'GPLv3'
+__version__ = '0.2'
+__maintainer__ = 'Ladislav Baco'
+__status__ = 'Development'
+
 TIMEFORMAT = '%Y-%m-%dT%H:%M:%SZ'
 NULL = '\x00\x00'
 RECORD_HEADER = '\x24\x00\x00\x00\x01\x00\x01\x00'
@@ -21,12 +46,12 @@ PROGHASH_HEADER = '\x9d\x13\x42\x00'
 OBJECTHASH_HEADER = '\x9e\x13\x42\x00'
 FIRSTSEEN_HEADER = '\x9f\x13\x46\x00'
 
-dataTypeHeaders = {'Object': OBJECT_HEADER,
+_dataTypeHeaders = {'Object': OBJECT_HEADER,
                    'Infiltration': INFILTRATION_HEADER,
                    'User': USER_HEADER,
                    'VirusDB': VIRUSDB_HEADER,
                    'ProgName': PROGNAME_HEADER}
-hashTypeHeaders = {'ObjectHash': OBJECTHASH_HEADER,
+_hashTypeHeaders = {'ObjectHash': OBJECTHASH_HEADER,
                'ProgHash': PROGHASH_HEADER}
 
 def eprint(*args, **kwargs):
@@ -46,7 +71,7 @@ def _winToUnixTimestamp(winTimestamp):
 def _extractDataType(dataType,rawRecord):
 	#Format: dataType_HEADER + '??' + NULL + objectData + NULL
 
-	dataType_HEADER = dataTypeHeaders[dataType]
+	dataType_HEADER = _dataTypeHeaders[dataType]
 	dataOffset = rawRecord.find(dataType_HEADER);
 	if dataOffset < 0:
 		_warningNotFound(dataType)
@@ -61,7 +86,7 @@ def _extractDataType(dataType,rawRecord):
 def _extractHashType(hashType,rawRecord):
 	#Format: hashType_HEADER + '??' + NULL + hashData[20]
 
-	hashType_HEADER = hashTypeHeaders[hashType]
+	hashType_HEADER = _hashTypeHeaders[hashType]
 	hashOffset = rawRecord.find(hashType_HEADER);
 	if hashOffset < 0:
 		_warningNotFound(hashType)
@@ -118,7 +143,7 @@ def parseRecord(recordId, rawRecord):
 	return [str(recordId), timestamp, virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
 
 def main():
-	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION, version=VERSION)
+	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION, version=__version__)
 	parser.add_argument('virlog', help='virlog.dat file to parse')
 
 	args = parser.parse_args()
