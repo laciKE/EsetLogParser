@@ -58,8 +58,8 @@ def eprint(*args, **kwargs):
 	'''Prints debug messages to stderr'''
 	print(*args, file=sys.stderr, **kwargs)
 
-def _warningNotFound(field):
-	eprint('Warning: field not found: ' + field)
+def _infoNotFound(field):
+	eprint('Info: field not found: ' + field)
 
 def _warningUnexpected(field):
 	eprint('Warning: unexpected bytes in field ' + field)
@@ -74,7 +74,7 @@ def _extractDataType(dataType,rawRecord):
 	dataType_HEADER = _dataTypeHeaders[dataType]
 	dataOffset = rawRecord.find(dataType_HEADER);
 	if dataOffset < 0:
-		_warningNotFound(dataType)
+		_infoNotFound(dataType)
 		return ''
 	if rawRecord[dataOffset+6:dataOffset+8] != NULL:
 		_warningUnexpected(dataType)
@@ -89,7 +89,7 @@ def _extractHashType(hashType,rawRecord):
 	hashType_HEADER = _hashTypeHeaders[hashType]
 	hashOffset = rawRecord.find(hashType_HEADER);
 	if hashOffset < 0:
-		_warningNotFound(hashType)
+		_infoNotFound(hashType)
 		return ''
 	if rawRecord[hashOffset+6:hashOffset+8] != NULL:
 		_warningUnexpected(hashType)
@@ -102,7 +102,7 @@ def _extractFirstSeen(rawRecord):
 
 	offset = rawRecord.find(FIRSTSEEN_HEADER);
 	if offset < 0:
-		_warningNotFound('FirstSeen')
+		_infoNotFound('FirstSeen')
 		return ''
 	littleEndianTimestamp = rawRecord[offset+4:offset+8]
 	timestamp = struct.unpack('<L', littleEndianTimestamp)[0]
