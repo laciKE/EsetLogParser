@@ -143,8 +143,10 @@ def parseRecord(recordId, rawRecord):
 	return [str(recordId), timestamp, virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
 
 def main():
-	parser = argparse.ArgumentParser(description='Eset Log Parser' + VERSION, version=__version__)
-	parser.add_argument('virlog', help='virlog.dat file to parse')
+	parser = argparse.ArgumentParser(description='EsetLogParser: Python script for parsing ESET (NOD32) virlog.dat file.')
+	parser.add_argument('virlog', help='path to virlog.dat file')
+	parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+
 
 	args = parser.parse_args()
 
