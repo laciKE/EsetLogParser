@@ -31,7 +31,7 @@ __author__ = 'Ladislav Baco'
 __copyright__ = 'Copyright (C) 2017'
 __credits__ = 'Ladislav Baco'
 __license__ = 'GPLv3'
-__version__ = '0.2'
+__version__ = '0.2.1'
 __maintainer__ = 'Ladislav Baco'
 __status__ = 'Development'
 
@@ -126,11 +126,12 @@ def _checkID(recordId, rawRecord):
 
 def getRawRecords(rawData):
 	rawRecords = rawData.split(RECORD_HEADER)[1:]
-	records = zip(range(len(rawRecords)), rawRecords)
-	for recordId, rawRecord in records:
+	ziprecords = zip(range(len(rawRecords)), rawRecords)
+	records = []
+	for recordId, rawRecord in ziprecords:
 		_checkID(recordId, rawRecord)
-	# "reset" interator in python3's zip object
-	records = zip(range(len(rawRecords)), rawRecords)
+		# create 2D array instead of zip-object in Python 3
+		records.append((recordId, rawRecord)) 
 	return records
 
 def parseRecord(recordId, rawRecord):
@@ -146,13 +147,15 @@ def parseRecord(recordId, rawRecord):
 
 	return [str(recordId), timestamp, virusdb, obj, objhash, infiltration, user, progname, proghash, firstseen]
 
-def main():
+def _parse_args(args):
 	parser = argparse.ArgumentParser(description='EsetLogParser: Python script for parsing ESET (NOD32) virlog.dat file.')
 	parser.add_argument('virlog', help='path to virlog.dat file')
 	parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+	return parser.parse_args(args)
 
 
-	args = parser.parse_args()
+def main(argv):
+	args = _parse_args(argv)
 
 	if not os.path.isfile(args.virlog):
 	        raise Exception('Virlog file does not exist')
@@ -167,4 +170,4 @@ def main():
 	print('\n'.join([';'.join(record) for record in parsedRecords]))
 
 if __name__ == '__main__':
-	main()
+	main(sys.argv[1:])
