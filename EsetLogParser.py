@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 from datetime import datetime
 import argparse
+import binascii
 import struct
 import os, time
 import sys
@@ -35,16 +36,16 @@ __maintainer__ = 'Ladislav Baco'
 __status__ = 'Development'
 
 TIMEFORMAT = '%Y-%m-%dT%H:%M:%SZ'
-NULL = '\x00\x00'
-RECORD_HEADER = '\x24\x00\x00\x00\x01\x00\x01\x00'
-OBJECT_HEADER = '\xbe\x0b\x4e\x00'
-INFILTRATION_HEADER = '\x4d\x1d\x4e\x00'
-USER_HEADER = '\xee\x03\x4e\x00'
-VIRUSDB_HEADER = '\x17\x27\x4e\x00'
-PROGNAME_HEADER = '\xc4\x0b\x4e\x00'
-PROGHASH_HEADER = '\x9d\x13\x42\x00'
-OBJECTHASH_HEADER = '\x9e\x13\x42\x00'
-FIRSTSEEN_HEADER = '\x9f\x13\x46\x00'
+NULL = b'\x00\x00'
+RECORD_HEADER = b'\x24\x00\x00\x00\x01\x00\x01\x00'
+OBJECT_HEADER = b'\xbe\x0b\x4e\x00'
+INFILTRATION_HEADER = b'\x4d\x1d\x4e\x00'
+USER_HEADER = b'\xee\x03\x4e\x00'
+VIRUSDB_HEADER = b'\x17\x27\x4e\x00'
+PROGNAME_HEADER = b'\xc4\x0b\x4e\x00'
+PROGHASH_HEADER = b'\x9d\x13\x42\x00'
+OBJECTHASH_HEADER = b'\x9e\x13\x42\x00'
+FIRSTSEEN_HEADER = b'\x9f\x13\x46\x00'
 
 _dataTypeHeaders = {'Object': OBJECT_HEADER,
                    'Infiltration': INFILTRATION_HEADER,
@@ -79,7 +80,7 @@ def _extractDataType(dataType,rawRecord):
 	if rawRecord[dataOffset+6:dataOffset+8] != NULL:
 		_warningUnexpected(dataType)
 	# find NULL char, but search for (\x00)*3, because third zero byte is part of last widechar
-	dataEnd = dataOffset + 9 + rawRecord[dataOffset+8:].find('\x00' + NULL)
+	dataEnd = dataOffset + 9 + rawRecord[dataOffset+8:].find(b'\x00' + NULL)
 	dataWideChar = rawRecord[dataOffset+8:dataEnd]
 	return dataWideChar.decode('utf-16')
 
@@ -95,7 +96,8 @@ def _extractHashType(hashType,rawRecord):
 		_warningUnexpected(hashType)
 	hashEnd = hashOffset + 9 + 20
 	hashHex = rawRecord[hashOffset+8:hashEnd]
-	return hashHex.encode('hex')
+	#return hashHex.encode('hex')
+	return binascii.hexlify(hashHex).decode('utf-8')
 
 def _extractFirstSeen(rawRecord):
 	#Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
@@ -127,6 +129,8 @@ def getRawRecords(rawData):
 	records = zip(range(len(rawRecords)), rawRecords)
 	for recordId, rawRecord in records:
 		_checkID(recordId, rawRecord)
+	# "reset" interator in python3's zip object
+	records = zip(range(len(rawRecords)), rawRecords)
 	return records
 
 def parseRecord(recordId, rawRecord):
