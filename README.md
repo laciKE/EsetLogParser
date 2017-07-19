@@ -1,10 +1,10 @@
-#EsetLogParser
+# EsetLogParser
 
 [![Build Status](https://travis-ci.org/laciKE/EsetLogParser.svg?branch=master)](https://travis-ci.org/laciKE/EsetLogParser) [![Python 2.7|3.5](https://img.shields.io/badge/python-2.7|3.5-yellow.svg)](https://www.python.org/)
 
 Proof of Concept
 
-##About
+## About
 Python script for parsing ESET (NOD32) `virlog.dat` file. This file contains records about infections detected during on access scans and it is usually located in `C:\ProgramData\Eset\*\Logs`.
 
 GUI of Eset antivirus program can display content of actual `virlog.dat` file, also it is possible to use Eset Log Collector for collect logs from this file. But none of this official program can easily display content of another `virlog.dat` file, for example file exracted from offline machine for further analysis.
@@ -14,11 +14,11 @@ On live system, it is not possible to overwrite the existing `virlog.dat`, becau
 
 This Python script can parse some content from `virlog.dat` files and convert this data to CSV format. This tool is based on reverse engineering the file format of `virlog.dat`, and work is in progress. For this reason, this scrit currently can not parse all the fields from `virlog.dat`.
 
-###Disclaimer
+### Disclaimer
 Tested on current version of Eset Nod32 and Smart Security and also on versions from middle of 2016.
 Correct functionality of this script is not guaranteed, because the file format of `virlog.dat` is proprietary internal format of Eset and this format may change with new versions of Eset products. In this case please create an Issue and if it is possible, please also provide samples of `virlog.dat`.
 
-##Supported fields
+## Supported fields
 - Detected object
 - Infiltration type
 - User name
@@ -30,22 +30,22 @@ Correct functionality of this script is not guaranteed, because the file format 
 - Timestamp of detection
 - ID of record
 
-###Note
+### Note
 It seems that not of the above fields are always present in record. If you don't see some of the above fields in the output of EsetLogParser, but you see this value in Eset GUI (Tools -> Logs), please send me the `virlog.dat` file and screenshot of Eset GUI Log Viewer.
 
-##Known fields
+## Known fields
 The list of curentlly reversed fields in `virlog.dat` file that are not parsed by EsetLogParser:
 
-##Unknown fields
+## Unknown fields
 The list of fields which I have not reversed in `virlog.dat` yet:
 - Object type (file, etc.)
 - Scanner (resident shield)
 - Action (erase, quarantine)
 
-##Usage
+## Usage
 `python EsetLogParser.py path_to_virlog.dat`
 
-##TODO
+## TODO
 - reversing all the fields in `virlog.dat` file
 - turn this PoC into real parser
 	- change fields extractor to fields parser
