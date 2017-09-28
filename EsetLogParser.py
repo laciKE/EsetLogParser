@@ -80,7 +80,7 @@ def _extractDataType(dataType,rawRecord):
 	if rawRecord[dataOffset+6:dataOffset+8] != NULL:
 		_warningUnexpected(dataType)
 	# find NULL char, but search for (\x00)*3, because third zero byte is part of last widechar
-	dataEnd = dataOffset + 9 + rawRecord[dataOffset+8:].find(b'\x00' + NULL)
+	dataEnd = dataOffset + 8 + 1 + rawRecord[dataOffset+8:].find(b'\x00' + NULL)
 	dataWideChar = rawRecord[dataOffset+8:dataEnd]
 	return dataWideChar.decode('utf-16')
 
@@ -94,7 +94,7 @@ def _extractHashType(hashType,rawRecord):
 		return ''
 	if rawRecord[hashOffset+6:hashOffset+8] != NULL:
 		_warningUnexpected(hashType)
-	hashEnd = hashOffset + 9 + 20
+	hashEnd = hashOffset + 8 + 20
 	hashHex = rawRecord[hashOffset+8:hashEnd]
 	#return hashHex.encode('hex')
 	return binascii.hexlify(hashHex).decode('utf-8')

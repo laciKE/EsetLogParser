@@ -70,7 +70,7 @@ class EsetLogParserTest(unittest.TestCase):
 			parsed = parseRecord(records[0][0], records[0][1])
 		self.assertEqual(int(parsed[0]), 0)
 		self.assertTrue('@Teststring.Eicar' in parsed)
-		self.assertTrue('3395856ce81f2b7382dee72602f798b642f14140a0' in parsed)
+		self.assertTrue('3395856ce81f2b7382dee72602f798b642f14140' in parsed)
 	def test_main(self):
 		import EsetLogParser
 		with capture() as (out, err):
@@ -78,7 +78,7 @@ class EsetLogParserTest(unittest.TestCase):
 		msg = out.getvalue()
 		self.assertEqual(msg.count('\n'),3)
 		self.assertTrue(msg.find('@Teststring.Eicar') > -1)
-		self.assertTrue(msg.find('3395856ce81f2b7382dee72602f798b642f14140a0') > -1)
+		self.assertTrue(msg.find('3395856ce81f2b7382dee72602f798b642f14140') > -1)
 	
 if __name__ == '__main__':
     unittest.main()
